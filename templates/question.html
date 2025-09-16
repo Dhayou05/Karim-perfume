@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سؤال {{ question_id + 1 }} - استبيان العطور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .answer-option {
+            transition: all 0.3s ease;
+        }
+        .answer-option:hover {
+            background-color: #faf5ff;
+            transform: translateX(-5px);
+        }
+        body {
+            background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);            color: #301374;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+            position: relative;
+            padding: 2rem;
+            flex-direction: column;
+        }
+        /* Mobile responsiveness for screens <= 640px (Tailwind's sm breakpoint) */
+@media (max-width: 640px) {
+  /* Container padding */
+  .max-w-6xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Heading smaller font and margin */
+  h1.text-4xl {
+    font-size: 1.75rem; /* smaller font */
+    margin-bottom: 1.5rem;
+  }
+
+  /* Search form: stack input and button vertically */
+  form.mb-6.flex.justify-center {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* Search input full width */
+  form.mb-6.flex.justify-center input[type="text"] {
+    width: 100% !important;
+    border-radius: 9999px; /* fully rounded */
+  }
+
+  /* Search button full width and rounded */
+  form.mb-6.flex.justify-center button.btn {
+    width: 100% !important;
+    border-radius: 9999px;
+  }
+
+  /* Table font size smaller */
+  table {
+    font-size: 0.875rem;
+  }
+
+  /* Table cells padding smaller */
+  th, td {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Images smaller */
+  table img {
+    max-width: 48px;
+    max-height: 48px;
+  }
+
+  /* Action buttons container: stack vertically with spacing */
+  td.flex.justify-center.space-x-4 {
+    flex-direction: column !important;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  /* Logout button smaller and repositioned */
+  .btn-logout {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 8px 10px;
+  }
+}
+
+    </style>
+</head>
+<body class=" min-h-screen">
+   <!-- Logo top-right linking to index page -->
+   <a href="{{ url_for('index') }}" title="العودة إلى الصفحة الرئيسية"  
+   style="position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 200;">
+   <img src="/static/images/karim.perfum.jpg" alt="شعار الموقع" 
+        style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; display: block;" />
+</a>
+
+    <div class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="max-w-2xl w-full">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-white">سؤال {{ question_id + 1 }} من {{ total_questions }}</span>
+                    <span class="text-sm text-white">{{ progress_percent|round|int }}% اكتمال</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="progress-bar h-3 rounded-full bg-gradient-to-r from-purple-400 to-pink-400" ></div>
+                </div>
+            </div>
+
+            <!-- Question Content -->
+            <form method="POST" class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">{{ question.question }}</h2>
+                
+                <div class="space-y-4 mb-8">
+                    {% for answer in question.answers %}
+                    <label class="answer-option flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="radio" name="answer" value="{{ loop.index0 }}" class="w-5 h-5 text-purple-600 ml-4" required>
+                        <span class="text-lg text-gray-700">{{ answer }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex justify-between">
+                    {% if question_id > 0 %}
+                    <a href="{{ url_for('question', question_id=question_id-1) }}" class="px-6 py-3 border  rounded-full text-gray-600 hover:bg-gray-50">
+                        السابق
+                    </a>
+                    {% else %}
+                    <span></span>
+                    {% endif %}
+                    
+                    <button type="submit" class="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700">
+                        {% if question_id == total_questions - 1 %}اظهر النتائج{% else %} التالي{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

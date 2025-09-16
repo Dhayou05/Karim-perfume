@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مرحباً بك في عالم العطور</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles */
+    /* Mobile responsiveness for screens <= 640px (Tailwind's sm breakpoint) */
+    @media (max-width: 640px) {
+      /* Container padding */
+      .max-w-6xl {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      /* Heading smaller font and margin */
+      h1.text-5xl {
+        font-size: 2rem; /* smaller font */
+        margin-bottom: 1.5rem;
+      }
+
+      /* Paragraph smaller font */
+      p.text-3xl {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Stack feature grid to single column */
+      .grid.md\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Feature icon smaller */
+      .feature-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.75rem;
+      }
+
+      /* Admin login button smaller */
+      .admin-login {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+        top: 0.5rem !important;
+        left: 0.5rem !important;
+      }
+    }
+
+    /* Body background and text */
+    body {
+      background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+      color: #301374;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Footer styles */
+    footer {
+      margin-top: 3rem;
+      color: #ccc;
+      font-size: 0.9rem;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-top: 1px solid #555;
+    }
+    footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+          
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(102, 126, 234, 0.3);
+        }
+  </style>
+</head>
+<body>
+
+  <!-- Logo top-right with refresh on click -->
+  <a href="#" onclick="location.reload(); return false;" title="تحديث الصفحة" class="logo-link absolute top-4 right-8 z-50">
+    <img src="/static/images/karim.perfum.jpg" alt="شعار الموقع" 
+         class="w-20 h-20 rounded-full object-cover block" />
+  </a>
+
+  <!-- Admin login button top-left -->
+  <a href="{{ url_for('login') }}" 
+     class="btn-primary admin-login absolute top-9 left-8 z-50 inline-block text-white px-4 py-2 rounded-full text-md font-semibold shadow-lg">
+    دخول المشرف
+  </a>
+
+  <main class="max-w-4xl mx-auto px-4 mt-24 w-full">
+    <div class="mb-12">
+      <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/46aab102-27a7-4c96-8930-17dd0fcb8fee.png" 
+           alt="زجاجات عطور أنيقة مرتبة بشكل فني مع خلفية زهرية" 
+           class="mx-auto rounded-2xl shadow-2xl mb-8 w-full max-w-md" />
+      <h1 class="text-5xl font-bold mb-6">مرحباً بك في عالم العطور</h1>
+      <p class="text-3xl text-white mb-8 max-w-2xl mx-auto">
+        اكتشف عطرك المثالي من خلال استبياننا الشخصي. 
+        سنرشدك خلال 10 أسئلة بسيطة لإنشاء تركيب العطر المخصص الخاص بك.
+      </p>
+      <a href="{{ url_for('question', question_id=0) }}" 
+         class="btn-primary inline-block text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg">
+        ابدأ رحلتك العطرية
+      </a>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 mt-16">
+      <div class="text-center">
+        <img src="/static/images/rose_plant_petals_nature_aroma_flowers_blossom_perfume_icon_261889.ico" alt="مخصص" class="feature-icon mx-auto" />
+        <h3 class="font-semibold text-white mb-2">مخصص</h3>
+        <p class="text-white">توصيات مصممة بناءً على تفضيلاتك</p>
+      </div>
+      <div class="text-center">
+        <img src="/static/images/flower_bloom_beauty_wellness_fragrance_astrantia_nature_spring_icon_261931.ico" alt="مزيج خبير" class="feature-icon mx-auto" />
+        <h3 class="font-semibold text-white mb-2">مزيج خبير</h3>
+        <p class="text-white">مختارة من نوتات وتركيبات عطرية مميزة</p>
+      </div>
+      <div class="text-center">
+        <img src="/static/images/flower_petals_blossom_botanical_nature_gardening_farming_leaves_sunflower_icon_261903.ico" alt="إبداع فريد" class="feature-icon mx-auto" />
+        <h3 class="font-semibold text-white mb-2">إبداع فريد</h3>
+        <p class="text-white">عطرك الخاص المصمم خصيصاً لك</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Contact Us Box -->
+  <section class="max-w-4xl mx-auto mt-16 p-8 bg-purple-900 bg-opacity-80 rounded-xl text-white shadow-lg w-full px-4">
+    <h2 class="text-3xl font-bold mb-4">تواصل معنا</h2>
+    <p class="mb-6 text-lg max-w-xl mx-auto">
+      إذا أعجبك متجرنا، تواصل معنا عبر وسائل التواصل أو زر موقعنا.
+    </p>
+    <div class="flex items-center space-x-6 rtl:space-x-reverse justify-center flex-wrap gap-6">
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/yourpage" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="hover:text-blue-400 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M22.675 0h-21.35C.597 0 0 .597 0 1.333v21.333C0 23.403.597 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.466.099 2.797.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.59l-.467 3.622h-3.123V24h6.116c.73 0 1.324-.597 1.324-1.334V1.333C24 .597 23.403 0 22.675 0z"/>
+        </svg>
+      </a>
+      <!-- Instagram -->
+      <a href="https://www.instagram.com/karim.parfumeur/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="hover:text-pink-500 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 2A3.75 3.75 0 004 7.75v8.5A3.75 3.75 0 007.75 20h8.5a3.75 3.75 0 003.75-3.75v-8.5A3.75 3.75 0 0016.25 4h-8.5zm8.75 1.5a1 1 0 110 2 1 1 0 010-2zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
+        </svg>
+      </a>
+      <!-- TikTok -->
+      <a href="https://www.tiktok.com/@karim.fragrance" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="hover:text-black transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 256 256" fill="currentColor">
+          <path d="M198.4 72.1a59.9 59.9 0 01-33.1-9.8v70.3a35.9 35.9 0 11-35.9-35.9v-24.1a59.9 59.9 0 0059 59v-70.2a59.7 59.7 0 009.9 0z"/>
+          <path d="M128 24a104 104 0 10104 104 104.12 104.12 0 00-104-104zm0 192a88 88 0 1188-88 88.1 88.1 0 01-88 88z"/>
+        </svg>
+      </a>
+      <!-- Location -->
+      <a href="https://goo.gl/maps/yourlocation" target="_blank" rel="noopener noreferrer" aria-label="موقعنا" class="hover:text-green-400 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <p class="text-black py-10 mb-4">created by dhayou05</p>
+
+</body>
+</html>

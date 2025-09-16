@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة التحكم - إدارة العطور</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #6b5b95;
+            /* Default button color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #8c6bb1;
+            /* Hover color */
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            /* Danger button color */
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            /* Danger hover color */
+        }
+
+        /* Confirmation Dialog Styles */
+        .confirmation-dialog {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Semi-transparent background */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            /* On top of other elements */
+        }
+
+        .dialog-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 320px;
+            margin: 0 1rem;
+        }
+
+        .dialog-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .dialog-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            min-width: 80px;
+            font-weight: bold;
+        }
+
+        .dialog-button.confirm {
+            background-color: #6bbf6b;
+            /* Confirm button color */
+            color: white;
+        }
+
+        .dialog-button.cancel {
+            background-color: #e74c3c;
+            /* Cancel button color */
+            color: white;
+        }
+
+        .dialog-button:hover {
+            opacity: 0.8;
+            /* Slightly fade on hover */
+        }
+
+        body {
+            background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+            color: #301374;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            /* Tailwind gray-300 */
+        }
+
+        th,
+        td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            /* Tailwind gray-100 */
+            font-weight: bold;
+        }
+
+        img {
+            border-radius: 0.375rem;
+            /* rounded */
+            object-fit: cover;
+            max-width: 64px;
+            max-height: 64px;
+            margin: 0 auto;
+        }
+
+        /* Flash messages */
+        .flash-message {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .flash-success {
+            background-color: #d1fae5;
+            /* green-100 */
+            color: #065f46;
+            /* green-800 */
+            border: 1px solid #10b981;
+            /* green-500 */
+        }
+
+        .flash-danger {
+            background-color: #fee2e2;
+            /* red-100 */
+            color: #991b1b;
+            /* red-800 */
+            border: 1px solid #ef4444;
+            /* red-500 */
+        }
+
+        .flash-warning {
+            background-color: #fef3c7;
+            /* yellow-100 */
+            color: #92400e;
+            /* yellow-800 */
+            border: 1px solid #f59e0b;
+            /* yellow-500 */
+        }
+
+        /* Logout button fixed top-left */
+        .btn-logout {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1024px) {
+
+            /* Medium screens (tablets) */
+            .max-w-6xl {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Smaller tablets and large phones */
+
+            h1.text-4xl {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            form.mb-6.flex.justify-center {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            form.mb-6.flex.justify-center input[type="text"] {
+                width: 100% !important;
+                border-radius: 9999px;
+            }
+
+            form.mb-6.flex.justify-center button.btn {
+                width: 100% !important;
+                border-radius: 9999px;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th,
+            td {
+                padding: 0.5rem 0.75rem;
+            }
+
+            table img {
+                max-width: 48px;
+                max-height: 48px;
+            }
+
+            td.flex.justify-center.space-x-4 {
+                flex-direction: column !important;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .btn-logout {
+                top: 0.5rem;
+                left: 0.5rem;
+                padding: 8px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Small phones */
+
+            body {
+                padding: 1rem;
+            }
+
+            h1.text-4xl {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            table img {
+                max-width: 40px;
+                max-height: 40px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .btn-logout {
+                top: 0.5rem;
+                left: 0.5rem;
+                padding: 6px 8px;
+            }
+        }
+    </style>
+    <script>
+        function confirmAction(message, actionUrl) {
+            const dialog = document.getElementById('confirmation-dialog');
+            const confirmButton = document.getElementById('confirm-button');
+            const cancelButton = document.getElementById('cancel-button');
+            const messageElement = document.getElementById('dialog-message');
+            messageElement.textContent = message;
+            dialog.style.display = 'flex';
+
+            confirmButton.onclick = null;
+            cancelButton.onclick = null;
+
+            confirmButton.onclick = function () {
+                window.location.href = actionUrl;
+            };
+            cancelButton.onclick = function () {
+                dialog.style.display = 'none';
+            };
+        }
+    </script>
+</head>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        if (flashMessages.length > 0) {
+            setTimeout(() => {
+                flashMessages.forEach(msg => {
+                    msg.style.transition = 'opacity 0.3s ease';
+                    msg.style.opacity = '0';
+                    setTimeout(() => {
+                        msg.style.display = 'none';
+                    }, 300);
+                });
+            }, 3000);
+        }
+    });
+</script>
+
+<body>
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div>
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Logout button fixed top-left with icon -->
+    <button class="btn-logout rounded-full" aria-label="تسجيل الخروج"
+        onclick="confirmAction('هل أنت متأكد أنك تريد تسجيل الخروج؟', '{{ url_for('logout') }}')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7" />
+            <path d="M7 16v1a2 2 0 002 2h6a2 2 0 002-2v-1" />
+            <path d="M7 8V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+        </svg>
+    </button>
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-black mb-6 text-center">لوحة التحكم - إدارة العطور</h1>
+
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('admin') }}" class="mb-6 flex justify-center">
+            <input type="text" name="q" placeholder="ابحث عن عطر..." value="{{ search_query | default('') }}"
+                class="rounded-full border border-gray-300 px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                aria-label="بحث عن عطر" />
+            <button type="submit" class="btn rounded-full px-4 flex items-center justify-center" aria-label="بحث">
+                <!-- Search icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                </svg>
+            </button>
+        </form>
+
+        {% if search_query %}
+        {% if perfumes|length == 0 %}
+        {% if suggestions|length > 0 %}
+        <p class="text-center text-gray-700 mb-2 font-semibold">اقتراحات:</p>
+        <ul class="list-disc list-inside text-center mb-6">
+            {% for suggestion in suggestions %}
+            <li>
+                <a href="{{ url_for('admin', q=suggestion.name) }}"
+                    class="text-purple-700 hover:text-purple-900 cursor-pointer">
+                    {{ suggestion.name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center text-white mb-6 font-semibold">لا توجد اقتراحات.</p>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+
+        <!-- Add new perfume button -->
+        <div class="mb-4 text-center flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ url_for('add_perfume') }}" class="btn rounded-full inline-block">إضافة عطر جديد</a>
+            <a href="{{ url_for('upload_data') }}" class="btn rounded-full inline-block">رفع البيانات</a>
+        </div>
+
+        <!-- Perfumes Table -->
+        <div class="overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الرقم التعريفي</th>
+                        <th>الاسم</th>
+                        <th>الوصف</th>
+                        <th>الصورة</th>
+                        <th>نسبة الإعجاب %</th>
+                        <th>نسبة عدم الإعجاب %</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for perfume in perfumes %}
+                    <tr>
+                        <td>{{ perfume.id }}</td>
+                        <td>{{ perfume.name }}</td>
+                        <td>{{ perfume.description }}</td>
+                        <td>
+                            <img src="{{ perfume.image_url }}" alt="{{ perfume.name }}" />
+                        </td>
+                        <td>{{ perfume.like_percent | default(0) }}%</td>
+                        <td>{{ perfume.dislike_percent | default(0) }}%</td>
+                        <td class="flex justify-center space-x-4 flex-wrap gap-2">
+                            <!-- Edit Icon -->
+                            <a href="{{ url_for('edit_perfume', perfume_id=perfume.id) }}"
+                                class="text-purple-700 hover:text-purple-900" aria-label="تعديل">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L12 14l-4 1 1-4 7.5-7.5z" />
+                                </svg>
+                            </a>
+
+                            <!-- Delete Icon -->
+                            <button type="button" class="text-purple-700 hover:text-purple-900" aria-label="حذف"
+                                onclick="confirmAction('هل أنت متأكد أنك تريد حذف هذا العطر؟', '{{ url_for('delete_perfume', perfume_id=perfume.id) }}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a1 1 0 00-1 1v1h6V4a1 1 0 00-1-1m-4 0h4" />
+                                </svg>
+                            </button>
+
+                            <!-- Hide/Show Icon -->
+                            <button type="button" class="text-purple-700 hover:text-purple-900"
+                                aria-label="{{ 'إظهار' if perfume.hidden else 'إخفاء' }}" onclick="confirmAction(
+                                        '{{ 'هل أنت متأكد أنك تريد إخفاء هذا العطر؟' if not perfume.hidden else 'هل أنت متأكد أنك تريد إظهار هذا العطر؟' }}', 
+                                        '{{ url_for('toggle_hide_perfume', perfume_id=perfume.id) }}'
+                                    )" style="background: none; border: none; cursor: pointer; padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    {% if perfume.hidden %}
+                                    <line x1="1" y1="23" x2="23" y2="1" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" />
+                                    {% endif %}
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-gray-500 py-4">لا توجد عطور حالياً</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="confirmation-dialog" role="dialog" aria-modal="true"
+        aria-labelledby="dialog-message">
+        <div class="dialog-content">
+            <p id="dialog-message" class="text-lg font-semibold">هل أنت متأكد؟</p>
+            <div class="dialog-buttons">
+                <button id="confirm-button" class="dialog-button confirm" aria-label="نعم">نعم</button>
+                <button id="cancel-button" class="dialog-button cancel" aria-label="لا">لا
+
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

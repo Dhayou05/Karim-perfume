@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تعديل العطر</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+      color: #301374;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      overflow-y: auto;
+      background-color: rgba(0,0,0,0.4);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      padding: 1.5rem;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      max-width: 400px;
+      width: 100%;
+      padding: 1.5rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+    }
+    .close {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #aaa;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #000;
+    }
+    /* Responsive */
+    @media (max-width: 640px) {
+      h1.text-3xl {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .container, .max-w-2xl {
+        padding: 1rem;
+        margin: 1rem;
+      }
+      form.bg-white {
+        padding: 1.5rem;
+      }
+      button.btn {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+      }
+      a.btn {
+        width: 100%;
+        margin-top: 0.75rem;
+        justify-content: center;
+      }
+    }
+  </style>
+  <script>
+    function showModal() {
+      document.getElementById('confirmationModal').style.display = 'flex';
+    }
+    function closeModal() {
+      document.getElementById('confirmationModal').style.display = 'none';
+    }
+    function confirmSubmit() {
+      closeModal();
+      document.getElementById('modify-perfume-form').submit();
+    }
+  </script>
+</head>
+<body class="min-h-screen">
+
+  <div class="w-full max-w-2xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold text-black mb-6">تعديل العطر</h1>
+    <form id="modify-perfume-form" method="POST" enctype="multipart/form-data" 
+          class="bg-white rounded-2xl shadow-xl p-8 space-y-6" 
+          onsubmit="event.preventDefault(); showModal();">
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="name">الاسم</label>
+        <input id="name" type="text" name="name" value="{{ perfume.name }}" required 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="description">الوصف</label>
+        <textarea id="description" name="description" required 
+                  class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" rows="4">{{ perfume.description }}</textarea>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="notes">النوتات (مفصولة بفواصل)</label>
+        <input id="notes" type="text" name="notes" value="{{ perfume.notes }}" required 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="profile">البروفايل</label>
+        <input id="profile" type="text" name="profile" value="{{ perfume.profile }}" required 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="image">الصورة</label>
+        <input id="image" type="file" name="image" accept="image/*" 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2" />
+      </div>
+      <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6 py-3 font-semibold transition-colors w-full">
+        تعديل العطر
+      </button>
+      <a href="{{ url_for('admin') }}" 
+         class="btn inline-flex items-center justify-center space-x-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-full px-6 py-3 font-semibold transition-colors w-full mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform scale-x-[-1]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>العودة</span>
+      </a>
+    </form>
+  </div>
+
+  <!-- Modal for Confirmation -->
+  <div id="confirmationModal" class="modal flex">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 class="text-lg font-bold mb-4">تأكيد التعديل</h2>
+      <p class="mb-6">هل أنت متأكد أنك تريد تعديل هذا العطر؟</p>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <button onclick="confirmSubmit()" 
+                class="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6 py-2 font-semibold transition-colors min-w-[120px]">
+          نعم، تعديل العطر
+        </button>
+        <button onclick="closeModal()" 
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-full px-6 py-2 font-semibold transition-colors min-w-[120px]">
+          لا، إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initially hide modal
+    document.getElementById('confirmationModal').style.display = 'none';
+  </script>
+</body>
+</html>

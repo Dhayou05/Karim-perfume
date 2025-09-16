@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>نتائج العطور الموصى بها</title>
+  <style>
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(90deg, #243949 0%, #517fa4 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #301374;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      text-align: center;
+      user-select: none;
+    }
+    h1 {
+      color: #000;
+      font-weight: 900;
+      font-size: 2.8rem;
+      margin-bottom: 2rem;
+      letter-spacing: 0.05em;
+    }
+    #perfume-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      max-width: 1200px;
+      width: 100%;
+    }
+    .perfume-card {
+      background: linear-gradient(145deg, #f9f9f9, #e6e6e6);
+      border-radius: 1.2rem;
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.1),
+        inset 0 0 10px rgba(255,255,255,0.7);
+      max-width: 300px;
+      width: 100%;
+      padding: 1.2rem 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
+      cursor: default;
+      border: 1px solid #d1c4e9;
+    }
+    .perfume-card:hover,
+    .perfume-card:focus-within {
+      transform: scale(1.07);
+      box-shadow:
+        0 12px 24px rgba(0,0,0,0.25),
+        inset 0 0 15px rgba(255,255,255,0.9);
+      outline: none;
+      z-index: 10;
+    }
+    .image-container {
+      position: relative;
+      width: 100%;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      user-select: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .perfume-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 1.2rem;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+      transition: filter 0.3s ease;
+    }
+    .perfume-card:hover img,
+    .perfume-card:focus-within img {
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    }
+    .like-dislike-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      gap: 1.2rem;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    button.like-dislike {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2.5px solid white;
+      background: rgba(255 255 255 / 0.85);
+      color: #764ba2;
+      font-weight: 700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        transform 0.2s ease,
+        box-shadow 0.3s ease;
+      user-select: none;
+      padding: 0;
+      box-shadow: 0 0 8px rgba(255 255 255 / 0.8);
+      cursor: pointer;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+    }
+    button.like-dislike svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+      pointer-events: none;
+      filter: drop-shadow(0 0 1px rgba(0,0,0,0.05));
+    }
+    button.like-dislike:hover:not(:disabled),
+    button.like-dislike:focus-visible:not(:disabled) {
+      background: #764ba2;
+      color: white;
+      outline: none;
+      transform: scale(1.2);
+      box-shadow:
+        0 0 12px #764ba2,
+        0 0 8px rgba(255 255 255 / 0.9);
+      filter: drop-shadow(0 0 4px #764ba2);
+    }
+    button.like-dislike:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+      filter: none;
+    }
+    .perfume-name {
+      color: #764ba2;
+      font-weight: 900;
+      margin: 0.6rem 0 0.3rem;
+      font-size: 1.35rem;
+      text-align: center;
+      user-select: text;
+      letter-spacing: 0.03em;
+    }
+ .perfume-description {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  color: #5a4a7d; /* A muted purple shade for elegance */
+  line-height: 1.5;
+  font-style: italic;
+  user-select: text;
+  min-height: 3.5em; /* Keeps consistent height for cards */
+  text-align: center;
+  letter-spacing: 0.02em;
+  transition: color 0.3s ease;
+}
+
+.perfume-card:hover .perfume-description,
+.perfume-card:focus-within .perfume-description {
+  color: #7e57c2; /* Slightly brighter purple on hover/focus */
+}
+
+.notes-list {
+  margin: 0 auto 1.5rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 0.8rem;
+  list-style: none;
+  user-select: text;
+}
+
+.notes-list span {
+  background-color: #ede7f6; /* Light purple background */
+  color: #5e35b1; /* Darker purple text */
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px; /* Pill shape */
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(94, 53, 177, 0.2);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  user-select: text;
+}
+
+.perfume-card:hover .notes-list span,
+.perfume-card:focus-within .notes-list span {
+  background-color: #7e57c2;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(126, 87, 194, 0.6);
+}
+rcentage-text {
+      font-weight: 700;
+      color: #333;
+      min-height: 1.8em;
+      user-select: none;
+      text-align: center;
+      font-size: 1rem;
+      margin-top: 0.25rem;
+      min-height: 1.8em;
+      letter-spacing: 0.02em;
+    }
+    #back-button {
+      margin-top: 3rem;
+      padding: 0.9rem 3rem;
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: white;
+      background-color: #764ba2;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 8px 20px rgba(118,75,162,0.8);
+      user-select: none;
+      text-decoration: none;
+      display: inline-block;
+      align-self: center;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    #back-button:hover,
+    #back-button:focus-visible {
+      background-color: #5a367f;
+      transform: scale(1.1);
+      outline: none;
+      box-shadow: 0 10px 28px rgba(90,54,127,0.95);
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      #perfume-results {
+        gap: 1.4rem;
+      }
+      .perfume-card {
+        max-width: 90vw;
+      }
+      .perfume-description {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>عطورك المثالية الموصى بها</h1>
+
+  <div id="perfume-results">
+    {% for perfume in perfumes %}
+    <div class="perfume-card" data-id="{{ perfume.id }}" tabindex="0" aria-label="بطاقة عطر {{ perfume.name }}">
+      <div class="image-container">
+        <img src="{{ perfume.image_url }}" alt="{{ perfume.name }}" />
+        <div class="like-dislike-container" role="group" aria-label="أزرار الإعجاب وعدم الإعجاب لعطر {{ perfume.name }}">
+          <button class="like-dislike" data-action="like" aria-label="أعجبني">
+            <!-- Thumbs up SVG icon -->
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M1 21h4V9H1v12zM23 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32a1 1 0 0 0-1.45-1l-7 7a1 1 0 0 0-.29.71V19a2 2 0 0 0 2 2h7c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"/>
+            </svg>
+          </button>
+          <button class="like-dislike dislike" data-action="dislike" aria-label="لم يعجبني">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" width="24" height="24">
+              <path d="M1 3h4v12H1V3zm22 11c0 1.1-.9 2-2 2h-6.31l.95 4.57.03.32a1 1 0 0 1-1.45 1l-7-7a1 1 0 0 1-.29-.71V5a2 2 0 0 1 2-2h7c.83 0 1.54.5 1.84 1.22l3.02 7.05c.09.23.14.47.14.73v2z"/>
+            </svg>
+          </button>
+          
+        </div>
+      </div>
+      <div class="perfume-name">{{ perfume.name }}</div>
+      <div class="perfume-description">{{ perfume.description }}</div>
+      <div>
+        <strong>النوتات الرئيسية:</strong>
+        <ul class="notes-list">
+          <div class="flex flex-wrap gap-2">
+            {% for note in perfume.notes %}
+            <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">{{ note }}</span>
+            {% endfor %}
+        </div>
+        </ul>
+      </div>
+      <div class="percentage-text" aria-live="polite"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="{{ url_for('index') }}" id="back-button" role="button" aria-label="العودة إلى الصفحة الرئيسية">عودة إلى الصفحة الرئيسية</a>
+
+  <script>
+    // Pass perfumes data safely from Flask to JS
+    const perfumesData = {{ perfumes | tojson | safe }};
+
+    document.querySelectorAll('.perfume-card').forEach(card => {
+      const likeBtn = card.querySelector('button[data-action="like"]');
+      const dislikeBtn = card.querySelector('button[data-action="dislike"]');
+      const percentageText = card.querySelector('.percentage-text');
+      const perfumeId = parseInt(card.getAttribute('data-id'));
+
+      function disableButtons() {
+        likeBtn.disabled = true;
+        dislikeBtn.disabled = true;
+      }
+
+      likeBtn.addEventListener('click', () => {
+        if (likeBtn.disabled) return;
+        fetch(`/api/rate/${perfumeId}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({action: 'like'})
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            percentageText.textContent = `أعجب بهذا العطر: ${data.like_percent}%`;
+            disableButtons();
+          } else {
+            alert('خطأ: ' + data.message);
+          }
+        })
+        .catch(() => alert('فشل الاتصال بالخادم'));
+      });
+
+      dislikeBtn.addEventListener('click', () => {
+        if (dislikeBtn.disabled) return;
+        fetch(`/api/rate/${perfumeId}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({action: 'dislike'})
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            percentageText.textContent = `لم يعجب بهذا العطر: ${data.dislike_percent}%`;
+            disableButtons();
+          } else {
+            alert('خطأ: ' + data.message);
+          }
+        })
+        .catch(() => alert('فشل الاتصال بالخادم'));
+      });
+    });
+  </script>
+
+</body>
+</html>

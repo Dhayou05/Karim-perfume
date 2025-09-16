@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>رفع بيانات العطور</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+      color: #301374;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      h1.text-3xl {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+      }
+      form.bg-white {
+        padding: 1.5rem;
+      }
+      input[type="file"] {
+        font-size: 0.9rem;
+      }
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="w-full max-w-md mx-auto">
+    <h1 class="text-3xl font-bold text-black mb-6">رفع بيانات العطور</h1>
+    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="mb-6 text-right">
+        <label for="file" class="block text-gray-700 mb-2 font-semibold">اختر ملف Excel</label>
+        <input id="file" type="file" name="file" accept=".xlsx" required
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <button type="submit" class="bg-purple-600 hover:bg-purple-700 transition-colors text-white px-6 py-3 rounded-full font-semibold w-full">
+        رفع
+      </button>
+    </form>
+  </div>
+</body>
+</html>
