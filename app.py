@@ -23,7 +23,8 @@ UPLOAD_FOLDER = 'static/images'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # setup mongodb client
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI_FALLBACK = "mongodb+srv://karimperfum_db_user:karim-perfm05@cluster0.0n7io2u.mongodb.net/?retryWrites=true&w=majority&readPreference=secondaryPreferred&serverSelectionTimeoutMS=5000&appName=Cluster0"
+MONGO_URI = os.getenv("MONGO_URI", MONGO_URI_FALLBACK)
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client.perfume_store
 perfumes_collection = db.perfumes
