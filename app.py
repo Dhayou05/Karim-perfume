@@ -3,76 +3,93 @@ import pandas as pd
 import os
 import json
 from datetime import timedelta
+from pymongo import MongoClient
+import re
+from dotenv import load_dotenv
+import certifi
+import dns.resolver
+
+# Fix SRV resolution timeouts by forcing Google DNS
+dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
+dns.resolver.default_resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'perfume_secret_key_123'  # Change this in production
+app.secret_key = os.getenv('SECRET_KEY', 'perfume_secret_key_123')
 app.permanent_session_lifetime = timedelta(hours=1)
 
 UPLOAD_FOLDER = 'static/images'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DATA_FILE = 'perfumes.json'
+# setup mongodb client
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+db = client.perfume_store
+perfumes_collection = db.perfumes
 
 questions = [
-    {'id': 0, 'question': "ما هي شخصية العطر التي تعتقد أنها تناسبك؟", 'answers': ["رومانسي وحالم", "جريء وواثق", "منعش وطبيعي"]},
-    {'id': 1, 'question': "أي فصل يمثل أسلوبك بشكل أفضل؟", 'answers': ["زهور الربيع", "شمس الصيف", "دفء الشتاء"]},
-    {'id': 2, 'question': "أين ترتدي العطر عادةً؟", 'answers': ["نهاراً بشكل عادي", "في الأماكن المهنية", "في المناسبات المسائية"]},
-    {'id': 3, 'question': "كيف تريد أن يشعرك العطر؟", 'answers': ["أنيق ومتطور", "نشيط وحيوي", "هادئ ومرتاح"]},
-    {'id': 4, 'question': "أي عائلة عطرية تجذبك أكثر؟", 'answers': ["باقات زهرية", "نوتات خشبية", "تركيبات حمضيات"]},
-    {'id': 5, 'question': "ما مستوى الشدة الذي تفضله؟", 'answers': ["خفيف وخاص", "معتدل الحضور", "قوي ودائم"]},
-    {'id': 6, 'question': "أي مناسبة هي الأهم لعطرك؟", 'answers': ["الارتداء اليومي", "مناسبات خاصة", "أمسيات رومانسية"]},
-    {'id': 7, 'question': "ما المزاج الذي تريد إثارة؟", 'answers': ["غامض وجذاب", "مرح ومبهج", "هادئ وسلمي"]},
-    {'id': 8, 'question': "أي تركيبة نوتات تبدو أكثر جاذبية؟", 'answers': ["الورد والفانيليا", "الصندل والكهرمان", "البرغموت والخزامى"]},
-    {'id': 9, 'question': "كم يجب أن يدوم عطرك المثالي؟", 'answers': ["4-6 ساعات", "6-8 ساعات", "8+ ساعات"]}
+    {'id': 0, 'question': "ما هو الانطباع الأول الذي ترغب في تركه عند دخولك لمكان ما؟", 'answers': ["أناقة وفخامة هادئة", "قوة، ثقة، وحضور طاغٍ", "حيوية، نظافة، وانتعاش"]},
+    {'id': 1, 'question': "ما هي عائلة النوتات العطرية التي تميل إليها بطبيعتك؟", 'answers': ["الأخشاب، العود، والتوابل الشرقية الدافئة", "الزهور الناعمة والفواكه الحلوة", "الليمون، البرغموت، والنسيم البحري"]},
+    {'id': 2, 'question': "في أي بيئة تقضي معظم وقتك طوال اليوم؟", 'answers': ["مكتب العمل أو اجتماعات مغلقة", "حركة مستمرة وأماكن مفتوحة", "سهرات ليلية ومناسبات خاصة"]},
+    {'id': 3, 'question': "كيف تفضل أن يكون مدى فوحان (انتشار) عطرك؟", 'answers': ["هادئ ومقتصر على من يقترب مني", "معتدل يترك أثراً أنيقاً عند المرور", "قوي يملأ المكان بمجرد الدخول"]},
+    {'id': 4, 'question': "لو اخترت رائحة لرحلة إجازة، أي الوجهات التالية تشبه ذوقك؟", 'answers': ["مدينة أوروبية شتوية وأجواء باردة", "جزيرة مشمسة وشواطئ استوائية", "منتجع طبيعي مليء بالأعشاب والهدوء"]},
+    {'id': 5, 'question': "أي التركيبات التالية تثير مشاعرك وتشعرك بالراحة الفورية؟", 'answers': ["الورد الجوري الممزوج بلمسة فانيليا كريمية", "أخشاب الصندل والعنبر مع لمحة من الدخان أو البخور", "الشاي الأخضر، اللافندر، أو الحمضيات اللاذعة"]},
+    {'id': 6, 'question': "ما هي الخاصية الأهم بالنسبة لك عند شراء عطر باهظ الثمن؟", 'answers': ["ثبات الرائحة (أكثر من 12 ساعة متواصلة)", "التميز والندرة (ألا يكون مكرراً بين الناس)", "نعومة الرائحة وسهولة تقبلها في جميع الأوقات"]},
+    {'id': 7, 'question': "كيف تعبر عن أسلوب ملابسك الشخصي (الذي يعكس شخصيتك)؟", 'answers': ["الألوان الداكنة والبدلات الرسمية أو الفخمة", "ملابس كاجوال خفيفة ومريحة وألوان فاتحة", "أزياء عصرية وألوان جريئة لافتة للأنظار"]},
+    {'id': 8, 'question': "مرحلة تطور العطر على الجلد: ما الذي تفضله؟", 'answers': ["أحب أن يتغير العطر مع الوقت وتظهر نوتات جديدة معقدة", "أفضل أن تلفتني الفتحة (الرشة الأولى) وأن تبقى الرائحة كما هي", "أهتم فقط لما تبقى من الرائحة بعد ساعات طويلة على ملابسي"]},
+    {'id': 9, 'question': "متى تشعر أنك في أمسّ الحاجة لارتداء عطرك المميز؟", 'answers': ["عندما أستعد لمقابلة عمل أو صفقة مهمة", "كل صباح كروتين يومي لتجديد النشاط والثقة", "في الأمسيات الليلة الرومانسية أو الأعراس"]}
 ]
 
-perfume_database = []
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'password123')
 
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'password123'  # Change this in production
+def get_all_perfumes():
+    return list(perfumes_collection.find({}, {'_id': 0}).sort('like_percent', -1))
 
-def load_perfumes():
-    global perfume_database
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            perfume_database = json.load(f)
-    else:
-        perfume_database = []
+import random
 
-def save_perfumes():
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(perfume_database, f, ensure_ascii=False, indent=4)
-
-load_perfumes()
-
-def generate_recommendations(user_answers):
+def generate_recommendations(user_answers, target_gender=None):
     score = 0
     for answer in user_answers.values():
         try:
             score += int(answer)
         except:
             pass
-    
-    selected_indices = set()
-    visible_perfumes = [p for p in perfume_database if not p.get('hidden', False)]
+    query = {'hidden': {'$ne': True}}
+    if target_gender in ['male', 'female']:
+        query['$or'] = [
+            {'gender_target': {'$in': [target_gender, 'unisex']}},
+            {'gender_target': {'$exists': False}}
+        ]
+        
+    visible_perfumes = list(perfumes_collection.find(query, {'_id': 0}).sort('like_percent', -1))
     if not visible_perfumes:
         return []
     
-    while len(selected_indices) < 3 and len(selected_indices) < len(visible_perfumes):
-        index = (score + len(selected_indices) * 2) % len(visible_perfumes)
-        selected_indices.add(index)
+    num_to_select = min(3, len(visible_perfumes))
+    rng = random.Random(score)
+    selected_perfumes = rng.sample(visible_perfumes, num_to_select)
     
-    return [visible_perfumes[i] for i in selected_indices]
+    selected_perfumes.sort(key=lambda x: x.get('like_percent', 0), reverse=True)
+    return selected_perfumes
 
 def get_next_perfume_id():
-    if not perfume_database:
+    last_perfume = perfumes_collection.find_one(sort=[('id', -1)])
+    if not last_perfume or 'id' not in last_perfume:
         return 1
-    return max((p['id'] for p in perfume_database)) + 1
+    return last_perfume['id'] + 1
 
 @app.route('/')
 def index():
     session.clear()
     return render_template('index.html')
+
+@app.route('/start/<gender>')
+def start_quiz(gender):
+    session.clear()
+    session['target_gender'] = gender
+    return redirect(url_for('question', question_id=0))
 
 @app.route('/question/<int:question_id>', methods=['GET', 'POST'])
 def question(question_id):
@@ -102,7 +119,7 @@ def result():
     if 'answers' not in session or len(session['answers']) < len(questions):
         return redirect(url_for('index'))
     
-    recommendations = generate_recommendations(session['answers'])
+    recommendations = generate_recommendations(session['answers'], session.get('target_gender'))
     return render_template('result.html', perfumes=recommendations)
 
 @app.route('/restart')
@@ -114,41 +131,47 @@ def restart():
 def rate_perfume(perfume_id):
     data = request.get_json()
     action = data.get('action')
-    perfume = next((p for p in perfume_database if p['id'] == perfume_id), None)
+    perfume = perfumes_collection.find_one({'id': perfume_id})
     if not perfume:
         return jsonify({'success': False, 'message': 'العطر غير موجود'}), 404
 
-    if 'like_count' not in perfume or not isinstance(perfume['like_count'], int):
-        perfume['like_count'] = 0
-    if 'dislike_count' not in perfume or not isinstance(perfume['dislike_count'], int):
-        perfume['dislike_count'] = 0
+    like_count = perfume.get('like_count', 0)
+    dislike_count = perfume.get('dislike_count', 0)
 
     if action == 'like':
-        perfume['like_count'] += 1
+        like_count += 1
     elif action == 'dislike':
-        perfume['dislike_count'] += 1
+        dislike_count += 1
     else:
         return jsonify({'success': False, 'message': 'إجراء غير صالح'}), 400
 
-    total = perfume['like_count'] + perfume['dislike_count']
+    total = like_count + dislike_count
     if total > 0:
-        perfume['like_percent'] = round((perfume['like_count'] / total) * 100)
-        perfume['dislike_percent'] = round((perfume['dislike_count'] / total) * 100)
+        like_percent = round((like_count / total) * 100)
+        dislike_percent = round((dislike_count / total) * 100)
     else:
-        perfume['like_percent'] = 0
-        perfume['dislike_percent'] = 0
+        like_percent = 0
+        dislike_percent = 0
 
-    save_perfumes()
+    perfumes_collection.update_one(
+        {'id': perfume_id},
+        {'$set': {
+            'like_count': like_count,
+            'dislike_count': dislike_count,
+            'like_percent': like_percent,
+            'dislike_percent': dislike_percent
+        }}
+    )
+
     return jsonify({
         'success': True,
-        'like_percent': perfume['like_percent'],
-        'dislike_percent': perfume['dislike_percent']
+        'like_percent': like_percent,
+        'dislike_percent': dislike_percent
     })
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('admin_logged_in'):
-        # If already logged in, redirect to admin page
         return redirect(url_for('admin'))
     if request.method == 'POST':
         username = request.form['username']
@@ -174,33 +197,26 @@ def admin():
         return redirect(url_for('login'))
     
     search_query = request.args.get('q', '').strip()
-    filtered_perfumes = perfume_database
     suggestions = []
 
     if search_query:
-        # Filter perfumes by name containing search query (case-insensitive)
-        filtered_perfumes = [p for p in perfume_database if search_query in p['name']]
+        regex_query = re.compile(f".*{re.escape(search_query)}.*", re.IGNORECASE)
+        filtered_perfumes = list(perfumes_collection.find({'name': regex_query}, {'_id': 0}).sort('like_percent', -1))
         
-        # If no exact matches, provide suggestions based on partial matches or similar names
         if not filtered_perfumes:
-            # Simple suggestion: perfumes whose name contains any word from search query
             query_words = search_query.split()
-            suggestions = []
-            for p in perfume_database:
-                if any(word.lower() in p['name'].lower() for word in query_words):
-                    suggestions.append(p)
-            # Limit suggestions to 5
-            suggestions = suggestions[:5]
-  
-
+            regex_words = [re.compile(f".*{re.escape(w)}.*", re.IGNORECASE) for w in query_words]
+            suggestions = list(perfumes_collection.find({'name': {'$in': regex_words}}, {'_id': 0}).limit(5))
+    else:
+        filtered_perfumes = get_all_perfumes()
 
     return render_template('admin.html', perfumes=filtered_perfumes, search_query=search_query, suggestions=suggestions)
+
 @app.after_request
 def add_security_headers(response):
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
-   
     return response
 
 @app.route('/admin/add', methods=['GET', 'POST'])
@@ -231,6 +247,7 @@ def add_perfume():
             'description': request.form['description'],
             'notes': notes,
             'profile': request.form['profile'],
+            'gender_target': request.form.get('gender_target', 'unisex'),
             'image_url': image_url,
             'hidden': False,
             'like_percent': 0,
@@ -238,8 +255,7 @@ def add_perfume():
             'like_count': 0,
             'dislike_count': 0
         }
-        perfume_database.append(new_perfume)
-        save_perfumes()
+        perfumes_collection.insert_one(new_perfume)
         flash('تم إضافة العطر بنجاح!', 'success')
         return redirect(url_for('admin'))
     
@@ -251,26 +267,29 @@ def edit_perfume(perfume_id):
         flash('يرجى تسجيل الدخول لتعديل العطور.', 'warning')
         return redirect(url_for('login'))
     
-    perfume = next((p for p in perfume_database if p['id'] == perfume_id), None)
+    perfume = perfumes_collection.find_one({'id': perfume_id}, {'_id': 0})
     if not perfume:
         flash('لم يتم العثور على العطر.', 'danger')
         return redirect(url_for('admin'))
     
     if request.method == 'POST':
         notes = [note.strip() for note in request.form['notes'].split(',') if note.strip()]
-        perfume['name'] = request.form['name']
-        perfume['description'] = request.form['description']
-        perfume['notes'] = notes
-        perfume['profile'] = request.form['profile']
+        update_data = {
+            'name': request.form['name'],
+            'description': request.form['description'],
+            'notes': notes,
+            'profile': request.form['profile'],
+            'gender_target': request.form.get('gender_target', 'unisex')
+        }
         
         if 'image' in request.files:
             image_file = request.files['image']
             if image_file.filename != '':
                 image_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
                 image_file.save(image_path)
-                perfume['image_url'] = f"/{image_path}"
+                update_data['image_url'] = f"/{image_path}"
         
-        save_perfumes()
+        perfumes_collection.update_one({'id': perfume_id}, {'$set': update_data})
         flash('تم تحديث العطر بنجاح!', 'success')
         return redirect(url_for('admin'))
     
@@ -282,9 +301,7 @@ def delete_perfume(perfume_id):
         flash('يرجى تسجيل الدخول لحذف العطور.', 'warning')
         return redirect(url_for('login'))
     
-    global perfume_database
-    perfume_database = [p for p in perfume_database if p['id'] != perfume_id]
-    save_perfumes()
+    perfumes_collection.delete_one({'id': perfume_id})
     flash('تم حذف العطر بنجاح!', 'success')
     return redirect(url_for('admin'))
 
@@ -294,11 +311,11 @@ def toggle_hide_perfume(perfume_id):
         flash('يرجى تسجيل الدخول لتعديل العطور.', 'warning')
         return redirect(url_for('login'))
     
-    perfume = next((p for p in perfume_database if p['id'] == perfume_id), None)
+    perfume = perfumes_collection.find_one({'id': perfume_id})
     if perfume:
-        perfume['hidden'] = not perfume.get('hidden', False)
-        save_perfumes()
-        status = 'مخفي' if perfume['hidden'] else 'ظاهر'
+        new_status = not perfume.get('hidden', False)
+        perfumes_collection.update_one({'id': perfume_id}, {'$set': {'hidden': new_status}})
+        status = 'مخفي' if new_status else 'ظاهر'
         flash(f'تم تحديث حالة العطر إلى: {status}', 'success')
     else:
         flash('لم يتم العثور على العطر.', 'danger')
@@ -321,13 +338,16 @@ def upload_data():
                         flash(f'عمود مطلوب مفقود: {col}', 'danger')
                         return redirect(url_for('upload_data'))
                 
+                new_perfumes = []
+                current_id = get_next_perfume_id()
                 for _, row in df.iterrows():
                     new_perfume = {
-                        'id': get_next_perfume_id(),
+                        'id': current_id,
                         'name': row['Name'],
                         'description': row['Description'],
                         'notes': row['Notes'].split(',') if 'Notes' in row and isinstance(row['Notes'], str) else [],
                         'profile': row['Profile'] if 'Profile' in row else '',
+                        'gender_target': 'unisex',
                         'image_url': row['Image URL'] if 'Image URL' in row else '',
                         'hidden': False,
                         'like_percent': 0,
@@ -335,9 +355,11 @@ def upload_data():
                         'like_count': 0,
                         'dislike_count': 0
                     }
-                    perfume_database.append(new_perfume)
+                    new_perfumes.append(new_perfume)
+                    current_id += 1
                 
-                save_perfumes()
+                if new_perfumes:
+                    perfumes_collection.insert_many(new_perfumes)
                 flash('تم رفع البيانات بنجاح!', 'success')
                 return redirect(url_for('admin'))
             except Exception as e:
@@ -348,5 +370,4 @@ def upload_data():
     return render_template('upload_data.html')
 
 if __name__ == '__main__':
-    
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

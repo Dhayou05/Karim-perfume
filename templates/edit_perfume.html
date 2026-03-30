@@ -123,6 +123,14 @@
                class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
       </div>
       <div>
+        <label class="block text-gray-700 font-semibold mb-2" for="gender_target">موجه لـ (الجنس)</label>
+        <select id="gender_target" name="gender_target" class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+          <option value="unisex" {% if perfume.gender_target == 'unisex' or not perfume.gender_target %}selected{% endif %}>للجنسين (رجالي ونسائي)</option>
+          <option value="male" {% if perfume.gender_target == 'male' %}selected{% endif %}>للرجال</option>
+          <option value="female" {% if perfume.gender_target == 'female' %}selected{% endif %}>للنساء</option>
+        </select>
+      </div>
+      <div>
         <label class="block text-gray-700 font-semibold mb-2" for="image">الصورة</label>
         <input id="image" type="file" name="image" accept="image/*" 
                class="border border-gray-300 rounded-lg w-full px-4 py-2" />

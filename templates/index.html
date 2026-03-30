@@ -107,7 +107,10 @@
   </a>
 
   <main class="max-w-4xl mx-auto px-4 mt-24 w-full">
-    <div class="mb-12">
+    
+    <!-- Main Intro View -->
+    <div id="main-view">
+      <div class="mb-12">
       <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/46aab102-27a7-4c96-8930-17dd0fcb8fee.png" 
            alt="زجاجات عطور أنيقة مرتبة بشكل فني مع خلفية زهرية" 
            class="mx-auto rounded-2xl shadow-2xl mb-8 w-full max-w-md" />
@@ -116,10 +119,10 @@
         اكتشف عطرك المثالي من خلال استبياننا الشخصي. 
         سنرشدك خلال 10 أسئلة بسيطة لإنشاء تركيب العطر المخصص الخاص بك.
       </p>
-      <a href="{{ url_for('question', question_id=0) }}" 
-         class="btn-primary inline-block text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg">
+      <button onclick="showGenderSelection()" 
+         class="btn-primary inline-block text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg cursor-pointer">
         ابدأ رحلتك العطرية
-      </a>
+      </button>
     </div>
 
     <div class="grid md:grid-cols-3 gap-8 mt-16">
@@ -138,7 +141,42 @@
         <h3 class="font-semibold text-white mb-2">إبداع فريد</h3>
         <p class="text-white">عطرك الخاص المصمم خصيصاً لك</p>
       </div>
+      </div>
     </div>
+
+    <!-- Gender Selection View -->
+    <div id="gender-view" class="hidden text-center mb-12">
+      <h2 class="text-4xl font-bold mb-12 text-white drop-shadow-md">من فضلك، اختر الجنس</h2>
+      <div class="flex flex-col md:flex-row justify-center items-center gap-12">
+        <!-- Male Card -->
+        <div onclick="startQuiz('male')" class="relative cursor-pointer group rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:shadow-[0_0_40px_rgba(102,126,234,0.8)] border-2 border-transparent hover:border-blue-400">
+          <img src="/static/images/male_3d.png" alt="ذكر 3D" class="w-72 h-[26rem] object-cover object-top filter brightness-[0.85] group-hover:brightness-110 transition-all duration-500 scale-100 group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-90"></div>
+          <div class="absolute bottom-6 w-full flex flex-col items-center">
+             <h3 class="text-3xl font-bold text-white tracking-widest drop-shadow-md mb-2">رجل</h3>
+             <div class="w-12 h-1 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
+        
+        <!-- Female Card -->
+        <div onclick="startQuiz('female')" class="relative cursor-pointer group rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:shadow-[0_0_40px_rgba(236,72,153,0.8)] border-2 border-transparent hover:border-pink-400">
+          <img src="/static/images/female_3d.png" alt="أنثى 3D" class="w-72 h-[26rem] object-cover object-top filter brightness-[0.85] group-hover:brightness-110 transition-all duration-500 scale-100 group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-[#3f0f24] via-transparent to-transparent opacity-90"></div>
+          <div class="absolute bottom-6 w-full flex flex-col items-center">
+             <h3 class="text-3xl font-bold text-white tracking-widest drop-shadow-md mb-2">إمرأة</h3>
+             <div class="w-12 h-1 bg-pink-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
+      </div>
+      
+      <button onclick="hideGenderSelection()" class="mt-12 text-white/70 hover:text-white px-6 py-2 rounded-full border border-white/20 hover:bg-white/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" class="rotate-180 origin-center"/>
+        </svg>
+        العودة
+      </button>
+    </div>
+
   </main>
 
   <!-- Contact Us Box -->
@@ -149,7 +187,7 @@
     </p>
     <div class="flex items-center space-x-6 rtl:space-x-reverse justify-center flex-wrap gap-6">
       <!-- Facebook -->
-      <a href="https://www.facebook.com/yourpage" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="hover:text-blue-400 transition-colors">
+      <a href="https://web.facebook.com/profile.php?id=61568881560570&locale=ar_AR" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="hover:text-blue-400 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M22.675 0h-21.35C.597 0 0 .597 0 1.333v21.333C0 23.403.597 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.466.099 2.797.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.59l-.467 3.622h-3.123V24h6.116c.73 0 1.324-.597 1.324-1.334V1.333C24 .597 23.403 0 22.675 0z"/>
         </svg>
@@ -168,7 +206,7 @@
         </svg>
       </a>
       <!-- Location -->
-      <a href="https://goo.gl/maps/yourlocation" target="_blank" rel="noopener noreferrer" aria-label="موقعنا" class="hover:text-green-400 transition-colors">
+      <a href="https://maps.app.goo.gl/Efn2RTL9FusEwK116?g_st=ac" target="_blank" rel="noopener noreferrer" aria-label="موقعنا" class="hover:text-green-400 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
         </svg>
@@ -178,5 +216,22 @@
 
   <p class="text-black py-10 mb-4">created by dhayou05</p>
 
+  <script>
+    function showGenderSelection() {
+      document.getElementById('main-view').classList.add('hidden');
+      document.getElementById('gender-view').classList.remove('hidden');
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function hideGenderSelection() {
+      document.getElementById('gender-view').classList.add('hidden');
+      document.getElementById('main-view').classList.remove('hidden');
+    }
+
+    function startQuiz(gender) {
+      window.location.href = "/start/" + gender;
+    }
+  </script>
 </body>
 </html>

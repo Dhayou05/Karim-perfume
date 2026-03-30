@@ -407,6 +407,7 @@
                         <th>الرقم التعريفي</th>
                         <th>الاسم</th>
                         <th>الوصف</th>
+                        <th>الجنس</th>
                         <th>الصورة</th>
                         <th>نسبة الإعجاب %</th>
                         <th>نسبة عدم الإعجاب %</th>
@@ -419,6 +420,9 @@
                         <td>{{ perfume.id }}</td>
                         <td>{{ perfume.name }}</td>
                         <td>{{ perfume.description }}</td>
+                        <td class="whitespace-nowrap">
+                            {% if perfume.gender_target == 'male' %}للرجال{% elif perfume.gender_target == 'female' %}للنساء{% else %}للجنسين{% endif %}
+                        </td>
                         <td>
                             <img src="{{ perfume.image_url }}" alt="{{ perfume.name }}" />
                         </td>
@@ -467,7 +471,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="text-center text-gray-500 py-4">لا توجد عطور حالياً</td>
+                        <td colspan="8" class="text-center text-gray-500 py-4">لا توجد عطور حالياً</td>
                     </tr>
                     {% endfor %}
                 </tbody>
