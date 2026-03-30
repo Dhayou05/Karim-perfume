@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل دخول المشرف</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Prevent back button after logout
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      history.go(1);
+    };
+  </script>
+  <style>
+    body {
+      background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+      color: #301374;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      h1.text-3xl {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+      }
+      form.bg-white {
+        padding: 1.5rem;
+      }
+      .logo-link img {
+        width: 80px !important;
+        height: 80px !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen relative">
+
+  <!-- Logo top-right linking to index page -->
+  <a href="{{ url_for('index') }}" title="العودة إلى الصفحة الرئيسية" 
+     class="logo-link fixed top-4 right-4 z-50">
+    <img src="/static/images/karim.perfum.jpg" alt="شعار الموقع" 
+         class="w-30 h-30 rounded-full object-cover block" style="width:120px; height:120px;" />
+  </a>
+
+  <div class="w-full max-w-md mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">تسجيل دخول المشرف</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="mb-6 text-red-600 text-right list-disc list-inside">
+          {% for category, message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="mb-6 text-right">
+        <label for="username" class="block text-gray-700 mb-2 font-semibold">اسم المستخدم</label>
+        <input id="username" type="text" name="username" required 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <div class="mb-6 text-right">
+        <label for="password" class="block text-gray-700 mb-2 font-semibold">كلمة المرور</label>
+        <input id="password" type="password" name="password" required 
+               class="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
+      </div>
+      <button type="submit" 
+              class="bg-purple-600 hover:bg-purple-700 transition-colors text-white px-6 py-3 rounded-full w-full font-semibold">
+        تسجيل الدخول
+      </button>
+    </form>
+  </div>
+
+</body>
+</html>
